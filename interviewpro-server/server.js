@@ -57,9 +57,6 @@ app.get("/", (req, res) => {
 });
 
 // Endpoint 1: generate one interview question
-if (answer.length > 3000) {
-  return res.status(400).json({ error: "answer is too long" });
-}
 app.post("/question", async (req, res) => {
   try {
     const { role, type, previousQuestions = [] } = req.body || {};
@@ -87,15 +84,16 @@ app.post("/question", async (req, res) => {
 });
 
 // Endpoint 2: score the user's answer
-if (answer.length > 3000) {
-  return res.status(400).json({ error: "answer is too long" });
-}
 app.post("/evaluate", async (req, res) => {
   try {
     const { role, question, answer } = req.body || {};
 
     if (!question || !answer) {
       return res.status(400).json({ error: "question and answer are required" });
+    }
+
+    if (answer.length > 3000) {
+      return res.status(400).json({ error: "answer is too long" });
     }
 
     const system =
