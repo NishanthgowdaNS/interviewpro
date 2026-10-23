@@ -1,5 +1,5 @@
-// Replace with YOUR laptop's IP address
-export const API_URL = "http://192.168.1.8:3000";
+// Deployed backend on Render
+export const API_URL = "https://interviewpro-gsda.onrender.com";
 
 async function post(path, body) {
     const res = await fetch(`${API_URL}${path}`, {
