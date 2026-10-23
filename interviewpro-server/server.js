@@ -2,10 +2,12 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { GoogleGenAI } from "@google/genai";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "20kb" }));
+app.use(rateLimit({ windowMs: 60 * 1000, max: 20 })); // max 20 requests per minute per IP
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const CANDIDATE_MODELS = [
@@ -55,6 +57,9 @@ app.get("/", (req, res) => {
 });
 
 // Endpoint 1: generate one interview question
+if (answer.length > 3000) {
+  return res.status(400).json({ error: "answer is too long" });
+}
 app.post("/question", async (req, res) => {
   try {
     const { role, type, previousQuestions = [] } = req.body || {};
@@ -82,6 +87,9 @@ app.post("/question", async (req, res) => {
 });
 
 // Endpoint 2: score the user's answer
+if (answer.length > 3000) {
+  return res.status(400).json({ error: "answer is too long" });
+}
 app.post("/evaluate", async (req, res) => {
   try {
     const { role, question, answer } = req.body || {};
@@ -111,7 +119,7 @@ app.post("/evaluate", async (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
